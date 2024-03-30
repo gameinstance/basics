@@ -69,8 +69,6 @@ public:
 	inline unsigned long tell();
 
 private:
-	static const constexpr char *_name = "basics::file::input";
-
 	FILE *_file;
 	char _buffer[BUFFER_SIZE];
 	size_t _pos;
@@ -93,8 +91,6 @@ public:
 	inline unsigned long tell();
 
 private:
-	static const constexpr char *_name = "basics::file::output";
-
 	FILE *_file;
 	char _buffer[BUFFER_SIZE];
 	size_t _pos;
@@ -106,13 +102,17 @@ private:
 /******************************************************************************************************/
 
 
+static constexpr const char *_input_name = "basics::file::input";
+static constexpr const char *_output_name = "basics::file::output";
+
+
 template<size_t BUFFER_SIZE>
 input<BUFFER_SIZE>::input(const char *pathname)
 	: _file{::fopen(pathname, mode_map[mode::read])},
 	  _buffer{}, _pos{0}, _count{0}
 {
 	if (_file == nullptr)
-		throw error{"%s failed to open file '%s'", _name, pathname};
+		throw error{"%s failed to open file '%s'", _input_name, pathname};
 }
 
 
@@ -140,7 +140,7 @@ inline char input<BUFFER_SIZE>::get()
 		_get();
 
 	if (_pos >= _count)
-		throw error{"%s::get() premature eos", _name};
+		throw error{"%s::get() premature eos", _input_name};
 
 	return _buffer[_pos++];
 }
@@ -150,7 +150,7 @@ template<size_t BUFFER_SIZE>
 inline void input<BUFFER_SIZE>::seek(long offset, whence w)
 {
 	if (::fseek(_file, offset, whence_map[w]) < 0)
-		throw error{"%s::seek() %s", _name, strerror(errno)};
+		throw error{"%s::seek() %s", _input_name, strerror(errno)};
 }
 
 
@@ -159,7 +159,7 @@ inline unsigned long input<BUFFER_SIZE>::tell()
 {
 	auto res = ::ftell(_file);
 	if (res < 0)
-		throw error{"%s::tell() %s", _name, strerror(errno)};
+		throw error{"%s::tell() %s", _input_name, strerror(errno)};
 
 	return res;
 }
@@ -182,7 +182,7 @@ output<BUFFER_SIZE>::output(const char *pathname, bool overwrite)
 	  _buffer{}, _pos{0}
 {
 	if (_file == nullptr)
-		throw error{"%s failed to open file '%s'", _name, pathname};
+		throw error{"%s failed to open file '%s'", _output_name, pathname};
 }
 
 
@@ -210,7 +210,7 @@ inline void output<BUFFER_SIZE>::flush()
 		_put();
 
 	if (::fflush(_file) != 0)
-		throw error{"%s::flush() %s", _name, strerror(errno)};
+		throw error{"%s::flush() %s", _output_name, strerror(errno)};
 }
 
 
@@ -218,7 +218,7 @@ template<size_t BUFFER_SIZE>
 inline void output<BUFFER_SIZE>::seek(long offset, whence w)
 {
 	if (::fseek(_file, offset, whence_map[w]) < 0)
-		throw error{"%s::seek() %s", _name, strerror(errno)};
+		throw error{"%s::seek() %s", _output_name, strerror(errno)};
 }
 
 
@@ -227,7 +227,7 @@ inline unsigned long output<BUFFER_SIZE>::tell()
 {
 	auto res = ::ftell(_file);
 	if (res < 0)
-		throw error{"%s::tell() %s", _name, strerror(errno)};
+		throw error{"%s::tell() %s", _output_name, strerror(errno)};
 
 	return res;
 }
@@ -237,7 +237,7 @@ template<size_t BUFFER_SIZE>
 inline void output<BUFFER_SIZE>::_put()
 {
 	if (::fwrite(_buffer, 1, _pos, _file) != _pos)
-		throw error{"%s::put() %s", _name, strerror(errno)};
+		throw error{"%s::put() %s", _output_name, strerror(errno)};
 
 	_pos = 0;
 }
